@@ -1072,7 +1072,7 @@ create_new_repo() {
 }
 
 get_protocol_of_url() {
-	echo "$1" | tr '[:upper:]' '[:lower:]' | egrep '^(ftp|sftp|ftps|ftpes)://.*' | cut -d ':' -f 1
+	echo "$1" | tr '[:upper:]' '[:lower:]' | egrep '^(ftp|sftp|ftps|ftpes)://' | cut -d ':' -f 1
 }
 
 download_remote_updates () {
