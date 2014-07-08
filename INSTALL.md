@@ -75,6 +75,11 @@ After this, open git bash (or cygwin bash for cygwin only):
 
 *Note: the /bin/ directory is a alias, and if you use msysgit this is the same as C:\Program Files (x86)\Git\bin\*
 
+Update to the latest version is simple as:
+
+	$ cd ~/git-ftp
+	$ git pull
+
 
 Upstream using symlinking
 -------------------------
@@ -85,16 +90,14 @@ Note: Make sure Git and cURL is installed.
 
 This is a easy way to have more then one git-ftp installed
 
-	$ mkdir -p ~/develop/git-ftp.git
-	$ cd ~/develop/git-ftp.git
-	$ git clone https://github.com/git-ftp/git-ftp.git .
-	$ chmod +x git-ftp
-	$ mkdir ~/bin && cd ~/bin/
-	$ ln -s ~/develop/git-ftp.git/git-ftp git-ftp.dev
+	$ git clone https://github.com/git-ftp/git-ftp.git ~/git-ftp.dev
+	$ chmod +x ~/git-ftp.dev/git-ftp
+	$ mkdir -p ~/bin
+	$ ln -s ~/git-ftp.dev/git-ftp ~/bin/git-ftp.dev
 
 After this you can use 'git ftp.dev' or 'git-ftp.dev'
 
 Update to the latest version is simple as:
 
-	$ cd ~/develop/git-ftp.git
+	$ cd ~/git-ftp.dev
 	$ git pull
