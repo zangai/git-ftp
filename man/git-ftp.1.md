@@ -216,13 +216,24 @@ The individual steps are:
 You can then review the changes and push the merged version to the remote server.
 Add --no-commit to prevent a commit of the final merge.
 
-If you are not interested in merging remote changes, you can just download all changed remote files into your current working tree:
+If you know that the remote changes are irrelevant and you want to
+overwrite them, you can use the `--force` switch to disable remote
+change detection temporarily.
+
+If the remote changes are probably irrelevant but you want to check them
+first, you can download them in the current working copy:
 
 	$ git ftp download -u <user> -p <password> ftp://host.example.com/public_html
 
-This will not update the SHA1 file on the server. So you can't push as long you pull, catchup or push with --force.
+This will not modifiy the git repository locally nor update anything on
+the server. You now have three possiblities:
 
-If you add the option --dry-run then you see the files which would be downloaded because they changed remotely.
+* Discard all changes (`git checkout -- *`) and overwrite them remotely
+(`git ftp push --force`)
+* Manually merge the changes, then commit, then push (`git ftp push
+--force`)
+* Leave the remote changes and the local files in that inconsistent
+state and do as if the push has happened (`git ftp catchup`)
 
 # SCOPES
 
