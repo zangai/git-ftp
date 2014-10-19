@@ -120,7 +120,7 @@ Another advantage is Git-ftp only handles files which are tracked with [Git].
 :	Asks what to do if untracked changes on the remote server are found. You can choose to overwrite or download the remote file, or to skip uploading this file once or always.
 
 `--ignore-remote-changes`
-:	Disable check for changes on the remote server before uploading.
+:	(Only push) Disable check for changes on the remote server before uploading. This slightly decreases the time you will need.
 
 `--disable-epsv`
 :	Tell curl to disable the use of the EPSV command when doing passive FTP transfers. Curl will normally always first attempt to use EPSV before PASV, but with this option, it will not try using EPSV.
@@ -195,6 +195,9 @@ to use with git-ftp, and you have lftp (<http://lftp.yar.ru/>) installed:
 * Sets this initial commit as the "deployed" version
 
 # Tracking Remote Changes
+
+Remote change tracking works by comparing the file modification date/time with the date/time of last deployment. This means that files may have identical content but still be considered "changes" (for example, because you uploaded the same file manually after the last deployment.)
+
 
 If others are making changes directly through FTP instead of through
 git-ftp, and you have lftp installed, you can pull updates:
