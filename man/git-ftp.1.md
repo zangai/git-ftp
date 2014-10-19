@@ -116,8 +116,8 @@ Another advantage is Git-ftp only handles files which are tracked with [Git].
 `--no-commit`
 :	Perform the merge at the and of pull but do not autocommit, to have the chance to inspect and further tweak the merge result before committing.
 
-`--interactive`
-:	Asks what to do if untracked changes on the remote server are found.
+`-i`, `--interactive`
+:	Asks what to do if untracked changes on the remote server are found. You can choose to overwrite or download the remote file, or to skip uploading this file once or always.
 
 `--ignore-remote-changes`
 :	Disable check for changes on the remote server before uploading.
