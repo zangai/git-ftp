@@ -675,6 +675,23 @@ test_push_ignore_remote_changes() {
 	assertEquals "0123" "$(curl -s $CURL_URL/numbers.txt)"
 }
 
+test_push_ignore_remote_changes_config() {
+	cd $GIT_PROJECT_PATH
+	echo "123" > numbers.txt
+	git add .
+	git commit -m 'three numbers' > /dev/null
+	$GIT_FTP_CMD init -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL > /dev/null
+	sleep 1 # otherwise the timestamp will be the same
+	echo "1234" > numbers.txt
+	curl -T numbers.txt $CURL_URL/ 2> /dev/null
+	echo "0123" > numbers.txt
+	git commit -a -m 'added zero' > /dev/null
+	git config git-ftp.checkForRemoteChanges 0
+	$GIT_FTP_CMD push -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL > /dev/null 2>&1
+	assertEquals 0 $?
+	assertEquals "0123" "$(curl -s $CURL_URL/numbers.txt)"
+}
+
 test_push_ignore_remote_changes_force() {
 	cd $GIT_PROJECT_PATH
 	echo "123" > numbers.txt

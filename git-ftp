@@ -89,6 +89,10 @@ readonly ERROR_SYNC=10
 # Functions
 # ------------------------------------------------------------
 
+load_config() {
+	CHECK_FOR_REMOTE_CHANGES=$(get_config checkForRemoteChanges $CHECK_FOR_REMOTE_CHANGES)
+}
+
 usage_long()
 {
 local pager=$(git config --get core.pager)
@@ -1367,6 +1371,7 @@ if [ $# = 0 ]; then
 	usage;
 fi
 
+load_config
 while test $# != 0
 do
 	case "$1" in
