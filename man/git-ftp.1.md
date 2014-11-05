@@ -119,8 +119,8 @@ Another advantage is Git-ftp only handles files which are tracked with [Git].
 `-i`, `--interactive`
 :	Asks what to do if untracked changes on the remote server are found. You can choose to overwrite or download the remote file, or to skip uploading this file once or always.
 
-`--ignore-remote-changes`
-:	(Only push) Disable check for changes on the remote server before uploading. This slightly decreases the time you will need.
+`--overwrite-remote-changes`
+:	Disable check for changes on the remote server before uploading. This can save some time.
 
 `--disable-epsv`
 :	Tell curl to disable the use of the EPSV command when doing passive FTP transfers. Curl will normally always first attempt to use EPSV before PASV, but with this option, it will not try using EPSV.
@@ -176,7 +176,7 @@ After setting those defaults, push to *john@ftp.example.com* is as simple as
 It checks for the timestamp of each file before uploading.
 If the remote file has changed since the last push, the action is cancelled.
 See **Tracking Remote Changes** for how to proceed in this case.
-You can disable this check with the option --ignore-remote-changes.
+You can disable this check with the option --overwrite-remote-changes.
 
 # Bootstrapping
 
@@ -220,8 +220,11 @@ You can then review the changes and push the merged version to the remote server
 Add --no-commit to prevent a commit of the final merge.
 
 If you know that the remote changes are irrelevant and you want to
-overwrite them, you can use the `--force` switch to disable remote
+overwrite them, you can use the `--overwrite-remote-changes` switch to disable remote
 change detection temporarily.
+You can disable the check permanently as well:
+
+	$ git config git-ftp.checkForRemoteChanges 0
 
 If the remote changes are probably irrelevant but you want to check them
 first, you can download them in the current working copy:
@@ -232,9 +235,9 @@ This will not modifiy the git repository locally nor update anything on
 the server. You now have three possiblities:
 
 * Discard all changes (`git checkout -- *`) and overwrite them remotely
-(`git ftp push --force`)
+(`git ftp push --overwrite-remote-changes`)
 * Manually merge the changes, then commit, then push (`git ftp push
---force`)
+--overwrite-remote-changes`)
 * Leave the remote changes and the local files in that inconsistent
 state and do as if the push has happened (`git ftp catchup`)
 
