@@ -546,6 +546,7 @@ test_syncroot() {
 }
 
 test_download() {
+	skip_without lftp
 	cd $GIT_PROJECT_PATH
 	$GIT_FTP_CMD init -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL > /dev/null
 	echo 'foreign content' > external.txt
@@ -560,6 +561,7 @@ test_download() {
 }
 
 test_download_syncroot() {
+	skip_without lftp
 	cd $GIT_PROJECT_PATH
 	mkdir foobar && echo "test" > foobar/syncroot.txt
 	git add . > /dev/null 2>&1
@@ -576,6 +578,7 @@ test_download_syncroot() {
 }
 
 test_pull() {
+	skip_without lftp
 	cd $GIT_PROJECT_PATH
 	$GIT_FTP_CMD init -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL > /dev/null
 	echo 'foreign content' > external.txt
@@ -591,6 +594,7 @@ test_pull() {
 }
 
 test_pull_branch() {
+	skip_without lftp
 	cd $GIT_PROJECT_PATH
 	$GIT_FTP_CMD init -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL > /dev/null
 	echo 'foreign content' > external.txt
@@ -612,6 +616,7 @@ test_pull_branch() {
 }
 
 test_pull_no_commit() {
+	skip_without lftp
 	cd $GIT_PROJECT_PATH
 	$GIT_FTP_CMD init -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL > /dev/null
 	echo 'foreign content' > external.txt
@@ -637,6 +642,7 @@ test_init_with_remote_changes() {
 }
 
 test_push_pull_push() {
+	skip_without lftp
 	cd $GIT_PROJECT_PATH
 	echo "1\n2\n3" > numbers.txt
 	git add .
@@ -652,7 +658,7 @@ test_push_pull_push() {
 	assertEquals 10 $?
 	# pull should merge changes
 	$GIT_FTP_CMD pull -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL > /dev/null 2>&1
-	echo "1\n1.5\n2\n2.5\n3" | diff numbers.txt -
+	[ isSkipping ] || echo "1\n1.5\n2\n2.5\n3" | diff numbers.txt -
 	assertEquals 0 $?
 	# now push should pass
 	$GIT_FTP_CMD push -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL > /dev/null 2>&1
@@ -837,6 +843,10 @@ remote_file_exists() {
 
 remote_file_equals() {
 	curl -s "$CURL_URL/$1" | diff - "$1" > /dev/null
+}
+
+skip_without() {
+	command -v $1 > /dev/null || startSkipping
 }
 
 # load and run shUnit2
