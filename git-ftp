@@ -286,11 +286,11 @@ get_keychain_password () {
 			print_error_and_die "Password not found in keychain for account '$KEYCHAIN_USER @ $KEYCHAIN_HOST'." $ERROR_MISSING_ARGUMENTS
 		fi
 	else
-		write_log "Ingoring -k on non-Darwin systems."
+		write_log "Ignoring -k on non-Darwin systems."
 	fi
 }
 
-# Checks if last comand was successful
+# Checks if last command was successful
 check_exit_status() {
 	if [ $? -ne 0 ]; then
 		print_error_and_die "$1, exiting..." $2
@@ -529,7 +529,7 @@ delete_file() {
 		curl "${CURL_ARGS[@]}" > /dev/null 2>&1
 	fi
 	if [ $? -ne 0 ]; then
-		write_error_log "Could not delete ${REMOTE_PATH}${FILENAME}, continuing..."
+		write_log "WARNING: Could not delete ${REMOTE_PATH}${FILENAME}, continuing..."
 	fi
 }
 
@@ -564,14 +564,19 @@ fire_delete_buffer() {
 		curl "${CURL_ARGS[@]}" > /dev/null 2>&1
 	fi
 	if [ $? -ne 0 ]; then
-		write_error_log "Some files and/or folders could not be deleted."
+		write_log "WARNING: Some files and/or folders could not be deleted."
 	fi
 	CURL_DELETE=()
 }
 
 delete_dir() {
 	ORIGIN_REMOTE_DELETE_CMD=$REMOTE_DELETE_CMD
-	REMOTE_DELETE_CMD="-*RMD "
+	if [ "$REMOTE_PROTOCOL" = "sftp" ]; then
+		# SFTP uses a different remove command and uses absolute paths
+		REMOTE_DELETE_CMD="rmdir /"
+	else
+		REMOTE_DELETE_CMD="-*RMD "
+	fi
 	delete_file_buffered $1
 	REMOTE_DELETE_CMD=$ORIGIN_REMOTE_DELETE_CMD
 }
@@ -1138,8 +1143,8 @@ set_number_of_threads() {
 }
 
 set_scope() {
-	[ -z $SCOPE ] && print_error_and_die "Missing scope argument." $ERROR_MISSING_ARGUMENTS
-	[ -z $URL ] && print_error_and_die "Missing URL." $ERROR_MISSING_ARGUMENTS
+	[ -z "$SCOPE" ] && print_error_and_die "Missing scope argument." $ERROR_MISSING_ARGUMENTS
+	[ -z "$URL" ] && print_error_and_die "Missing URL." $ERROR_MISSING_ARGUMENTS
 
 	# URI without credentials
 	if ! echo "$URL" | grep -q '@'; then
@@ -1149,12 +1154,12 @@ set_scope() {
 
 	# set url
 	local protocol=$(get_protocol_of_url "$URL")
-	local path=${URL##*@}
+	local path="${URL##*@}"
 	$(git config git-ftp.$SCOPE.url ${protocol}${path})
 
 	# strip protocol
 	local credentials=${URL#${protocol}}
-	# cut at last '@' occurence
+	# cut at last '@' occurrence
 	local credentials=${credentials%${URL##*@}}
 	# strip trailing '@'
 	local credentials=${credentials%?}
@@ -1178,7 +1183,7 @@ set_scope() {
 }
 
 remove_scope() {
-	[ -z $SCOPE ] && print_error_and_die "Missing scope argument." $ERROR_MISSING_ARGUMENTS
+	[ -z "$SCOPE" ] && print_error_and_die "Missing scope argument." $ERROR_MISSING_ARGUMENTS
 
 	$(git config --remove-section git-ftp.$SCOPE &>/dev/null)
 
@@ -1325,8 +1330,8 @@ check_deployed_sha1() {
 
 check_git_version() {
 	local GIT_VERSION=$(git --version | cut -d ' ' -f 3)
-	local MAJOR=$(echo $GIT_VERSION | cut -d '.' -f 1)
-	local MINOR=$(echo $GIT_VERSION | cut -d '.' -f 2)
+	local MAJOR="$(echo $GIT_VERSION | cut -d '.' -f 1)"
+	local MINOR="$(echo $GIT_VERSION | cut -d '.' -f 2)"
 	if [ $MAJOR -lt 2 ] && [ $MINOR -lt 7 ]; then
 		print_error_and_die "Git is too old, 1.7.0 or higher supported only." $ERROR_GIT
 	fi
@@ -1384,6 +1389,10 @@ do
 			# catch scope
 			if [ "$1" == "add-scope" ] || [ "$1" == "remove-scope" ]; then
 				SCOPE="$2"
+				pattern="[^a-zA-Z0-9_]"
+				if [[ $SCOPE =~ $pattern ]]; then
+					print_error_and_die "Invalid scope name." $ERROR_USAGE
+				fi
 				shift
 			fi
 			;;
@@ -1425,6 +1434,10 @@ do
 					fi
 					;;
 			esac
+			pattern="[^a-zA-Z0-9_]"
+			if [[ $SCOPE =~ $pattern ]]; then
+				print_error_and_die "Invalid scope name." $ERROR_USAGE
+			fi
 			set_deployed_sha1_file
 			write_log "Using scope $SCOPE if available"
 			;;
@@ -1477,10 +1490,10 @@ do
 				*)
 					if ! echo "$2" | egrep -q '^-'; then
 						REMOTE_PASSWD="$2"
-						shift
 					else
 						ask_for_passwd
 					fi
+					shift
 					;;
 			esac
 			;;
