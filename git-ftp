@@ -1213,9 +1213,13 @@ fetch_remote() {
 handle_fetch() {
 	local old_sha1=$DEPLOYED_SHA1
 	git checkout $DEPLOYED_SHA1 2> /dev/null
+	# If .gitignore changes between commits, untracked file can remain.
+	# These files are preserved in a stash record.
+	local stash=$(git stash -u)
 	remote_lock
 	fetch_remote
 	release_remote_lock
+	[ "$stash" != 'No local changes to save' ] && git stash pop
 	git checkout $CURRENT_BRANCH 2> /dev/null
 	if [ $DRY_RUN -ne 1 ]; then
 		print_info "From $REMOTE_HOST/$REMOTE_PATH"
