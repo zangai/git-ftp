@@ -603,6 +603,14 @@ test_pull() {
 	assertTrue ' external file not downloaded' "[ -r 'external.txt' ]"
 }
 
+test_pull_nothing() {
+	skip_without lftp
+	cd $GIT_PROJECT_PATH
+	$GIT_FTP_CMD init -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL > /dev/null
+	$GIT_FTP_CMD pull -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL > /dev/null 2>&1
+	assertEquals 0 $?
+}
+
 test_pull_branch() {
 	skip_without lftp
 	cd $GIT_PROJECT_PATH
@@ -641,6 +649,22 @@ test_pull_no_commit() {
 	assertEquals 0 $rtrn
 	assertTrue ' external file not downloaded' "[ -r 'external.txt' ]"
 	assertEquals $LOCAL_SHA1 $(git log -n 1 --pretty=format:%H)
+}
+
+test_pull_dry_run() {
+	skip_without lftp
+	cd $GIT_PROJECT_PATH
+	$GIT_FTP_CMD init -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL > /dev/null
+	echo 'foreign content' | curl -T - $CURL_URL/external.txt 2> /dev/null
+	echo 'own content' > internal.txt
+	git add . > /dev/null 2>&1
+	git commit -a -m "local modification" > /dev/null 2>&1
+	pull=$($GIT_FTP_CMD pull --dry-run -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL 2> /dev/null)
+	assertEquals 0 $?
+	assertTrue ' external file downloaded' "[ ! -e 'external.txt' ]"
+	assertFalse "$pull" "echo \"$pull\" | grep 'Last deployment changed to '"
+	# TODO: idea: really download files and show `git diff` and `git diff --stat`, then reset
+	# Problem: local files that are currently ignored, but weren't ignored at last git-ftp push
 }
 
 test_init_with_remote_changes() {

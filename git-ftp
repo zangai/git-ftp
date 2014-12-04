@@ -1203,6 +1203,7 @@ set_current_branch() {
 
 fetch_remote() {
 	download_remote_updates
+	[ $DRY_RUN -ne 1 ] || return
 	git add --all
 	git commit -m '[git-ftp] remotely untracked modifications'
 	set_local_sha1
@@ -1216,8 +1217,10 @@ handle_fetch() {
 	fetch_remote
 	release_remote_lock
 	git checkout $CURRENT_BRANCH 2> /dev/null
-	print_info "From $REMOTE_HOST/$REMOTE_PATH"
-	print_info "   $old_sha1..$LOCAL_SHA1"
+	if [ $DRY_RUN -ne 1 ]; then
+		print_info "From $REMOTE_HOST/$REMOTE_PATH"
+		print_info "   $old_sha1..$LOCAL_SHA1"
+	fi
 }
 
 # ------------------------------------------------------------
