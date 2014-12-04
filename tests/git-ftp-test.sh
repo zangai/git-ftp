@@ -577,6 +577,16 @@ test_download_syncroot() {
 	assertTrue ' external file not downloaded to syncroot' "[ -r 'foobar/external.txt' ]"
 }
 
+test_download_dry_run() {
+	skip_without lftp
+	cd $GIT_PROJECT_PATH
+	$GIT_FTP_CMD init -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL > /dev/null
+	echo 'foreign content' | curl -T - $CURL_URL/external.txt 2> /dev/null
+	$GIT_FTP_CMD download --dry-run -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL > /dev/null 2>&1
+	assertEquals 0 $?
+	assertTrue ' external file downloaded' "[ ! -e 'external.txt' ]"
+}
+
 test_pull() {
 	skip_without lftp
 	cd $GIT_PROJECT_PATH
