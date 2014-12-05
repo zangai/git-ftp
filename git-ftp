@@ -1138,10 +1138,6 @@ cd_to_new_repo () {
 	cd $NEW_REPO || print_error_and_die "cd '$NEW_REPO' failed. Exiting..."
 }
 
-set_number_of_threads() {
-	number_of_connections="$(get_config connections 2)"
-}
-
 set_scope() {
 	[ -z "$SCOPE" ] && print_error_and_die "Missing scope argument." $ERROR_MISSING_ARGUMENTS
 	[ -z "$URL" ] && print_error_and_die "Missing URL." $ERROR_MISSING_ARGUMENTS
@@ -1658,10 +1654,6 @@ do
 					fi
 					;;
 			esac
-			;;
-		--connections)
-			number_of_connections=$2
-			shift
 			;;
 		--remote-root)
 			REMOTE_ROOT="$2"
