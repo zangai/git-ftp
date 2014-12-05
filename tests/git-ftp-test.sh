@@ -177,26 +177,26 @@ test_push_nothing() {
 
 test_push_added() {
 	cd $GIT_PROJECT_PATH
-	init=$($GIT_FTP_CMD init -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL)
+	init=$($GIT_FTP init)
 	# add a file
 	file='newfile.txt'
 	echo "1" > "./$file"
 	git add $file
 	git commit -m "change" > /dev/null 2>&1
-	push=$($GIT_FTP_CMD push -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL)
+	push=$($GIT_FTP push)
 	assertEquals 0 $? || echo "Push: $push"
 	assertEquals "1" "$(curl -s $CURL_URL/$file)"
 }
 
 test_push_twice() {
 	cd $GIT_PROJECT_PATH
-	init=$($GIT_FTP_CMD init -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL)
+	init=$($GIT_FTP init)
 	# make some changes
 	echo "1" >> "./test 1.txt"
 	git commit -a -m "change" > /dev/null 2>&1
-	push=$($GIT_FTP_CMD push -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL)
+	push=$($GIT_FTP push)
 	assertEquals 0 $? || echo "First push: $push"
-	push=$($GIT_FTP_CMD push -u $GIT_FTP_USER -p $GIT_FTP_PASSWD $GIT_FTP_URL)
+	push=$($GIT_FTP push)
 	assertEquals 0 $? || echo "Second push: $push"
 	assertTrue "$push" "echo \"$push\" | grep 'Everything up-to-date.'"
 }
