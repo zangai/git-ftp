@@ -400,22 +400,11 @@ set_default_curl_options() {
 	fi
 }
 
-upload_get_dest_file() {
-	local DEST_FILE="$1"
-
-	if [ -n "$SYNCROOT" ]; then
-		DEST_FILE=${DEST_FILE/$SYNCROOT/$REPLACE}
-	fi
-
-	echo $DEST_FILE
-}
-
 upload_file() {
 	local SRC_FILE="$1"
 	local DEST_FILE="$2"
-
 	if [ -z $DEST_FILE ]; then
-		DEST_FILE=$(upload_get_dest_file $SRC_FILE)
+		DEST_FILE=${SRC_FILE#$SYNCROOT}
 	fi
 
 	set_default_curl_options
@@ -486,9 +475,8 @@ upload_file_buffered() {
 	local SRC_FILE="$1"
 	local DEST_FILE="$2"
 	local ADD_ARGS=()
-
 	if [ -z $DEST_FILE ]; then
-		DEST_FILE=$(upload_get_dest_file $SRC_FILE)
+		DEST_FILE=${SRC_FILE#$SYNCROOT}
 	fi
 
 	ADD_ARGS+=(-T "./$SRC_FILE")
@@ -830,7 +818,7 @@ handle_file_sync() {
 			FILE_NAME=$(printf "$FILE_ITERATOR" | cut -f2- -d ' ')
 			FILE_NAME=${FILE_NAME/#\"/}
 			FILE_NAME=${FILE_NAME/%\"/}
-			DEST_FILE=$(upload_get_dest_file $FILE_NAME)
+			DEST_FILE=${FILE_NAME#$SYNCROOT}
 			if remote_file_modified "$FILE_NAME" "$DEST_FILE" ; then
 				if [ $INTERACTIVE -eq 0 ] ; then
 					print_info ' ! [aborted]  Untracked remoted changes were found.'
