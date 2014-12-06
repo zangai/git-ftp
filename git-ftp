@@ -146,7 +146,7 @@ ACTIONS
 		Downloads changes from the remote host into your working tree.
 
 		But probably you want to use pull.
-	
+
 	. add-scope
 		Add a scope (e.g. dev, production, testing).
 
@@ -1122,6 +1122,24 @@ cd_to_new_repo () {
 	cd $NEW_REPO || print_error_and_die "cd '$NEW_REPO' failed. Exiting..."
 }
 
+download_remote_updates () {
+	write_log "Mirroring ${REMOTE_HOST}/${REMOTE_PATH}"
+	local mirror_options=''
+	if [ "$DRY_RUN" = 1 ]; then
+		mirror_options="$mirror_options --dry-run"
+	fi
+	if [ "$VERBOSE" -gt 0 ]; then
+		mirror_options="$mirror_options -v"
+	fi
+
+	ignore=""
+	if [ -f '.git-ftp-ignore' ]; then
+		ignore=`grep -v ^# .git-ftp-ignore | awk 'NF' | sed 's/^/--exclude /'`
+		ignore=`echo $ignore | tr -d '\r'`
+	fi
+	lftp $LFTP_OPTIONS -e "set ftp:list-options -a && mirror$mirror_options $ignore --delete --exclude=^\.git/ --exclude=^\.git-ftp\.log --exclude=^\.git-ftp-ignore . $SYNCROOT && wait all && exit" -u "${REMOTE_USER},${REMOTE_PASSWD}" ${REMOTE_PROTOCOL}://${REMOTE_HOST}/${REMOTE_PATH}
+}
+
 set_scope() {
 	[ -z "$SCOPE" ] && print_error_and_die "Missing scope argument." $ERROR_MISSING_ARGUMENTS
 	[ -z "$URL" ] && print_error_and_die "Missing URL." $ERROR_MISSING_ARGUMENTS
@@ -1274,9 +1292,10 @@ action_log() {
 }
 
 action_download() {
+	check_lftp_available
 	check_is_git_project
 	check_is_dirty_repository
-	check_lftp_available
+	check_for_untracked_files
 	set_remotes
 	remote_lock
 	download_remote_updates
@@ -1347,6 +1366,10 @@ check_is_git_project() {
 
 check_is_dirty_repository() {
 	[ $(git status -uno --porcelain | wc -l) -ne 0 ] && print_error_and_die "Dirty repository: Having uncommitted changes. Exiting..." $ERROR_GIT
+}
+
+check_for_untracked_files() {
+	[ $(git status --porcelain | wc -l) -ne 0 ] && print_error_and_die "Dirty repository: Having untracked files. Exiting..." $ERROR_GIT
 }
 
 check_lftp_available() {
