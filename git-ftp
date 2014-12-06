@@ -855,14 +855,8 @@ handle_file_sync() {
 			if is_submodule "$FILE_NAME"; then
 				handle_submodule_sync "${FILE_NAME#$SYNCROOT}"
 
-			else
-				if [ $DRY_RUN -ne 1 ]; then
-					if is_arg_max_reached "$FILE_NAME" "${CURL_UPLOADS[@]}"; then
-						IFS="$OIFS"
-						fire_upload_buffer
-						IFS="$NIFS"
-					fi
-					upload_file_buffered "$FILE_NAME" ""
+			else if [ $DRY_RUN -ne 1 ]; then
+					upload_file_buffered "$FILE_NAME"
 				fi
 			fi
 		# Removing file
