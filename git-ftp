@@ -52,7 +52,6 @@ DEPLOYED_SHA1_FILE=".git-ftp.log"
 DEPLOYED_SHA1=""
 LOCAL_SHA1=""
 SYNCROOT=""
-COMMIT_ARGS=" --no-edit"
 CURL_INSECURE=""
 CURL_PUBLIC_KEY=""
 CURL_PRIVATE_KEY=""
@@ -1077,7 +1076,7 @@ get_protocol_of_url() {
 }
 
 download_remote_updates () {
-	write_log "Copying from ${REMOTE_HOST}/${REMOTE_PATH} $1"
+	write_log "Mirroring ${REMOTE_HOST}/${REMOTE_PATH}"
 	local mirror_options=''
 	if [ "$DRY_RUN" = 1 ]; then
 		mirror_options="$mirror_options --dry-run"
@@ -1120,24 +1119,6 @@ add_all_files_and_commit () {
 cd_to_new_repo () {
 	write_log "cd $NEW_REPO"
 	cd $NEW_REPO || print_error_and_die "cd '$NEW_REPO' failed. Exiting..."
-}
-
-download_remote_updates () {
-	write_log "Mirroring ${REMOTE_HOST}/${REMOTE_PATH}"
-	local mirror_options=''
-	if [ "$DRY_RUN" = 1 ]; then
-		mirror_options="$mirror_options --dry-run"
-	fi
-	if [ "$VERBOSE" -gt 0 ]; then
-		mirror_options="$mirror_options -v"
-	fi
-
-	ignore=""
-	if [ -f '.git-ftp-ignore' ]; then
-		ignore=`grep -v ^# .git-ftp-ignore | awk 'NF' | sed 's/^/--exclude /'`
-		ignore=`echo $ignore | tr -d '\r'`
-	fi
-	lftp $LFTP_OPTIONS -e "set ftp:list-options -a && mirror$mirror_options $ignore --delete --exclude=^\.git/ --exclude=^\.git-ftp\.log --exclude=^\.git-ftp-ignore . $SYNCROOT && wait all && exit" -u "${REMOTE_USER},${REMOTE_PASSWD}" ${REMOTE_PROTOCOL}://${REMOTE_HOST}/${REMOTE_PATH}
 }
 
 set_scope() {
@@ -1303,9 +1284,9 @@ action_download() {
 }
 
 action_pull() {
+	check_lftp_available
 	check_is_git_project
 	check_is_dirty_repository
-	check_lftp_available
 	set_current_branch
 	set_remotes
 	set_deployed_sha1
@@ -1647,8 +1628,8 @@ do
 			if [ $ACTIVE_MODE -eq 0 ]; then
 				CURL_DISABLE_EPSV=1
 				write_log "Disabling EPSV."
-					fi
-					;;
+			fi
+			;;
 		-m|--message)
 			case "$#,$1" in
 				*,*=*)
