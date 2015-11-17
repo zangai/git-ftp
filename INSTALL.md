@@ -10,7 +10,7 @@ This should work on Mac OS X, Debian, Ubuntu, Fedora, RedHat, etc.
 
 The easiest way is to use Git for installing:
 
-	$ git clone https://github.com/git-ftp/git-ftp.git
+	$ git clone https://github.com/mkllnk/git-ftp.git
 	$ cd git-ftp
 	$ git tag # see available tags
 	$ git checkout <tag> # checkout the latest tag by replacing <tag>
@@ -78,7 +78,7 @@ In order to use SFTP, download curl for Windows with SFTP support on the [curl w
 After this, open git bash (or cygwin bash for cygwin only):
 
 	$ cd ~
-	$ git clone https://github.com/git-ftp/git-ftp
+	$ git clone https://github.com/mkllnk/git-ftp
 	$ cd git-ftp && chmod +x git-ftp
 	$ cd /bin
 	$ ln -s ~/git-ftp/git-ftp
@@ -97,7 +97,7 @@ This is a easy way to have more then one git-ftp installed
 
 	$ mkdir -p ~/develop/git-ftp.git
 	$ cd ~/develop/git-ftp.git
-	$ git clone https://github.com/git-ftp/git-ftp.git .
+	$ git clone https://github.com/mkllnk/git-ftp.git .
 	$ chmod +x git-ftp
 	$ mkdir ~/bin && cd ~/bin/
 	$ ln -s ~/develop/git-ftp.git/git-ftp git-ftp.dev
